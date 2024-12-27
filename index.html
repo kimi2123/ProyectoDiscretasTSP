@@ -1,0 +1,36 @@
+// HTML structure
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP Solver</title>
+    <style>
+        #map {
+            height: 700px;
+            width: 100%;
+        }
+        .controls {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>TSP Solver</h1>
+    <div class="controls">
+        <label for="algorithm">Select Algorithm:</label>
+        <select id="algorithm">
+            <option value="bruteForce">Brute Force</option>
+            <option value="localSearch">Local Search</option>
+            <option value="genetic">Genetic Algorithm</option>
+            <option value="simulatedAnnealing">Simulated Annealing</option>
+        </select>
+        <button id="solveTSP">Solve TSP</button>
+    </div>
+    <div id="map"></div>
+
+    <script defer
+        src="https://maps.googleapis.com/maps/api/js?key=[yourApiKey]&libraries=geometry&callback=initMap">
+    </script>
+</body>
+</html>
