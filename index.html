@@ -1,36 +1,31 @@
-// HTML structure
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSP Solver</title>
-    <style>
-        #map {
-            height: 700px;
-            width: 100%;
-        }
-        .controls {
-            margin: 10px;
-        }
-    </style>
+    <title>Mapa Interactivo con Algoritmos</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAraMD5UVAr__7sCgvJu9wm-3g6_tiqikE&callback=initMap" async defer></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>TSP Solver</h1>
-    <div class="controls">
-        <label for="algorithm">Select Algorithm:</label>
-        <select id="algorithm">
-            <option value="bruteForce">Brute Force</option>
-            <option value="localSearch">Local Search</option>
-            <option value="genetic">Genetic Algorithm</option>
-            <option value="simulatedAnnealing">Simulated Annealing</option>
-        </select>
-        <button id="solveTSP">Solve TSP</button>
-    </div>
+    <h1>Mapa Interactivo con Algoritmos</h1>
     <div id="map"></div>
-
-    <script defer
-        src="https://maps.googleapis.com/maps/api/js?key=[yourApiKey]&libraries=geometry&callback=initMap">
-    </script>
+    <div id="controls">
+        <h3>Ciudades Seleccionadas:</h3>
+        <ul id="selected-cities"></ul>
+        <button id="clear-markers">Limpiar Ciudades</button>
+        <div>
+            <label for="algorithm-selector">Seleccionar Algoritmo:</label>
+            <select id="algorithm-selector">
+                <option value="brute-force">Fuerza Bruta</option>
+                <option value="local-search">Búsqueda Local</option>
+                <option value="genetic">Algoritmo Genético</option>
+                <option value="simulated-annealing">Simulated Annealing</option>
+            </select>
+            <button id="calculate-route">Calcular Ruta</button>
+        </div>
+        <div id="results"></div>
+    </div>
 </body>
 </html>
