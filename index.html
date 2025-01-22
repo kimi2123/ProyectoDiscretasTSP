@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Rutas y Grafo con Google Maps</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAraMD5UVAr__7sCgvJu9wm-3g6_tiqikE&callback=initMap" async defer></script>
-    <link rel="stylesheet" href="style.css">
+    <!-- Sustituye con tu propia API key si es necesario -->
+    <script 
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAraMD5UVAr__7sCgvJu9wm-3g6_tiqikE&callback=initMap" 
+      async defer>
+    </script>
+    <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -19,17 +23,15 @@
         <ul id="selected-cities"></ul>
         <button id="clear-markers">Limpiar Ciudades</button>
         <button id="toggle-map">Alternar Mapas</button>
-        <div>
-            <label for="algorithm-selector">Seleccionar Algoritmo:</label>
-            <select id="algorithm-selector">
-                <option value="brute-force">Fuerza Bruta</option>
-                <option value="local-search">Búsqueda Local</option>
-                <option value="genetic">Algoritmo Genético</option>
-                <option value="simulated-annealing">Simulated Annealing</option>
-            </select>
-            <button id="calculate-route">Calcular Ruta</button>
+        <p id="selected-algorithm" style="margin: 10px 0;"></p>
+        <button id="calculate-route">Calcular Ruta</button>
+        <div
+          id="results"
+          style="margin-top: 20px; background: #f9f9f9; padding: 15px; border: 1px solid #ddd;"
+        >
+            <h3>Resultados de la Ruta:</h3>
+            <p>Los resultados aparecerán aquí después de calcular la ruta.</p>
         </div>
-        <div id="results"></div>
     </div>
 </body>
 </html>

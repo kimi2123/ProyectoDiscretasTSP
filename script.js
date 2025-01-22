@@ -4,19 +4,19 @@ let markers = [];
 let selectedCities = [];
 let directionsService;
 let directionsRenderer;
-let graphLines = []; // Líneas y etiquetas del grafo
-let distanceMatrix = {}; // Almacena las distancias reales entre ciudades
-let showingGraphMap = false; // Controla qué mapa se muestra
+let graphLines = [];
+let distanceMatrix = {};
+let showingGraphMap = false;
+let currentRoute = []; // Ruta calculada actualmente
 
-// Inicializa los mapas
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: -1.831239, lng: -78.183406 }, // Ecuador
+        center: { lat: -1.831239, lng: -78.183406 },
         zoom: 7,
     });
 
     graphMap = new google.maps.Map(document.getElementById("graph-map"), {
-        center: { lat: -1.831239, lng: -78.183406 }, // Ecuador
+        center: { lat: -1.831239, lng: -78.183406 },
         zoom: 7,
     });
 
@@ -32,20 +32,17 @@ function initMap() {
     document.getElementById("toggle-map").addEventListener("click", toggleMap);
 }
 
-// Alterna entre los mapas (ruta y grafo)
 function toggleMap() {
     showingGraphMap = !showingGraphMap;
     document.getElementById("map").style.display = showingGraphMap ? "none" : "block";
     document.getElementById("graph-map").style.display = showingGraphMap ? "block" : "none";
+
+    if (showingGraphMap && currentRoute.length > 0) {
+        drawGraph(currentRoute); // Dibuja el grafo con la ruta calculada
+    }
 }
 
-// Añade un marcador y actualiza la matriz de distancias
 function addMarker(location) {
-    if (selectedCities.length >= 10) {
-        alert("Máximo 10 ciudades permitidas.");
-        return;
-    }
-
     const marker = new google.maps.Marker({
         position: location,
         map: map,
@@ -57,26 +54,29 @@ function addMarker(location) {
     updateDistanceMatrix();
 }
 
-// Limpia los marcadores y el grafo
 function clearMarkers() {
     markers.forEach((marker) => marker.setMap(null));
     markers = [];
     selectedCities = [];
+    currentRoute = [];
     distanceMatrix = {};
     clearGraphLines();
     updateSelectedCities();
-    directionsRenderer.setMap(null); // Elimina la ruta mostrada
-    directionsRenderer = new google.maps.DirectionsRenderer({ map }); // Reinicia el renderer
-    document.getElementById("results").innerHTML = ""; // Limpia los resultados
+
+    directionsRenderer.setMap(null);
+    directionsRenderer = new google.maps.DirectionsRenderer({ map });
+
+    document.getElementById("results").innerHTML = `
+        <h3>Resultados de la Ruta:</h3>
+        <p>Los resultados aparecerán aquí después de calcular la ruta.</p>
+    `;
 }
 
-// Limpia las líneas del grafo
 function clearGraphLines() {
     graphLines.forEach((line) => line.setMap(null));
     graphLines = [];
 }
 
-// Actualiza la lista de ciudades seleccionadas
 function updateSelectedCities() {
     const cityList = document.getElementById("selected-cities");
     cityList.innerHTML = "";
@@ -85,7 +85,6 @@ function updateSelectedCities() {
     });
 }
 
-// Actualiza la matriz de distancias reales entre ciudades
 function updateDistanceMatrix() {
     const requests = [];
     distanceMatrix = {};
@@ -105,7 +104,7 @@ function updateDistanceMatrix() {
                         },
                         (response, status) => {
                             if (status === google.maps.DirectionsStatus.OK) {
-                                const distance = response.routes[0].legs[0].distance.value / 1000; // En km
+                                const distance = response.routes[0].legs[0].distance.value / 1000;
                                 if (!distanceMatrix[i]) distanceMatrix[i] = {};
                                 if (!distanceMatrix[j]) distanceMatrix[j] = {};
                                 distanceMatrix[i][j] = distance;
@@ -125,18 +124,12 @@ function updateDistanceMatrix() {
     Promise.all(requests).then(() => console.log("Matriz de distancias actualizada"));
 }
 
-// Dibuja la ruta seleccionada en el grafo con distancias
-function drawSelectedGraph(route) {
+function drawGraph(route) {
     clearGraphLines();
 
-    // Excluye la última ciudad para evitar líneas duplicadas en el grafo
     for (let i = 0; i < route.length - 1; i++) {
         const city1 = route[i];
         const city2 = route[i + 1];
-        const cityIndex1 = selectedCities.indexOf(city1);
-        const cityIndex2 = selectedCities.indexOf(city2);
-
-        const distance = distanceMatrix[cityIndex1][cityIndex2];
 
         const line = new google.maps.Polyline({
             path: [city1, city2],
@@ -154,7 +147,7 @@ function drawSelectedGraph(route) {
 
         const label = new google.maps.Marker({
             position: midPoint,
-            label: `${distance.toFixed(2)} km`,
+            label: `${calculateDistance(city1, city2).toFixed(2)} km`,
             map: graphMap,
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
@@ -166,9 +159,9 @@ function drawSelectedGraph(route) {
     }
 }
 
-// Calcula la ruta seleccionada con un algoritmo
 function calculateRoute() {
-    const algorithm = document.getElementById("algorithm-selector").value;
+    const algorithm = selectBestAlgorithm();
+    document.getElementById("selected-algorithm").innerText = `Algoritmo recomendado: ${algorithm}`;
 
     if (selectedCities.length < 2) {
         alert("Selecciona al menos dos ciudades para calcular una ruta.");
@@ -177,41 +170,40 @@ function calculateRoute() {
 
     let result;
     switch (algorithm) {
-        case "brute-force":
+        case "Fuerza Bruta":
             result = bruteForce();
             break;
-        case "local-search":
+        case "Búsqueda Local":
             result = localSearch();
             break;
-        case "genetic":
+        case "Algoritmo Genético":
             result = geneticAlgorithm();
             break;
-        case "simulated-annealing":
+        case "Simulated Annealing":
             result = simulatedAnnealing();
             break;
         default:
-            alert("Selecciona un algoritmo válido.");
+            alert("Error al seleccionar el algoritmo.");
             return;
     }
 
-    drawRealRoute(result.route);
-    drawSelectedGraph(result.route);
+    currentRoute = result.route; // Guarda la ruta calculada
+    drawRealRoute(currentRoute);
+    drawGraph(currentRoute);
 }
 
-// Dibuja la ruta real en el mapa
 function drawRealRoute(route) {
     const orderedWaypoints = route.slice(1, -1).map((city) => ({
-        location: city,
+        location: new google.maps.LatLng(city.lat, city.lng),
         stopover: true,
     }));
 
     directionsService.route(
         {
-            origin: route[0],
-            destination: route[0],
+            origin: new google.maps.LatLng(route[0].lat, route[0].lng),
+            destination: new google.maps.LatLng(route[0].lat, route[0].lng),
             waypoints: orderedWaypoints,
             travelMode: google.maps.TravelMode.DRIVING,
-            optimizeWaypoints: false,
         },
         (response, status) => {
             if (status === google.maps.DirectionsStatus.OK) {
@@ -228,38 +220,42 @@ function drawRealRoute(route) {
     );
 }
 
-// Muestra los resultados de la ruta
 function displayResults(route, totalDistance, totalDuration) {
     const resultsDiv = document.getElementById("results");
     const routeDisplay = route
-        .slice(0, -1) // Excluye la última ciudad repetida
+        .slice(0, -1)
         .map((city, index) => `Ciudad ${index + 1}`)
-        .join(" → ") + " → Ciudad 1"; // Añade la ciudad inicial al final solo para mostrar
+        .join(" → ") + " → Ciudad 1";
 
     resultsDiv.innerHTML = `
-        <h3>Resultados:</h3>
-        <p>Ruta: ${routeDisplay}</p>
-        <p>Distancia Total (Carreteras): ${totalDistance.toFixed(2)} km</p>
-        <p>Tiempo de Recorrido: ${(totalDuration / 60).toFixed(2)} minutos</p>
+        <h3>Resultados de la Ruta:</h3>
+        <p><strong>Ruta Calculada:</strong> ${routeDisplay}</p>
+        <p><strong>Distancia Total:</strong> ${totalDistance.toFixed(2)} km</p>
+        <p><strong>Tiempo Estimado:</strong> ${(totalDuration / 60).toFixed(2)} minutos</p>
     `;
 }
 
-// Algoritmos (implementados según la teoría de grafos)
+function calculateDistance(city1, city2) {
+    const cityIndex1 = selectedCities.indexOf(city1);
+    const cityIndex2 = selectedCities.indexOf(city2);
+    return distanceMatrix[cityIndex1][cityIndex2] || 0;
+}
+
+// ============================
+//        ALGORITMOS TSP
+// ============================
 
 function bruteForce() {
     const permutations = getPermutations(selectedCities);
     let bestRoute = null;
     let bestDistance = Infinity;
-
     for (const route of permutations) {
         const totalDistance = calculateRouteDistance(route);
-
         if (totalDistance < bestDistance) {
             bestDistance = totalDistance;
             bestRoute = route;
         }
     }
-
     return { route: [...bestRoute, bestRoute[0]], distance: bestDistance };
 }
 
@@ -267,7 +263,6 @@ function localSearch() {
     let route = [...selectedCities];
     let bestDistance = calculateRouteDistance(route);
     let improved = true;
-
     while (improved) {
         improved = false;
         for (let i = 1; i < route.length - 1; i++) {
@@ -275,7 +270,6 @@ function localSearch() {
                 const newRoute = [...route];
                 [newRoute[i], newRoute[j]] = [newRoute[j], newRoute[i]];
                 const newDistance = calculateRouteDistance(newRoute);
-
                 if (newDistance < bestDistance) {
                     bestDistance = newDistance;
                     route = newRoute;
@@ -284,17 +278,16 @@ function localSearch() {
             }
         }
     }
-
     return { route: [...route, route[0]], distance: bestDistance };
 }
 
 function geneticAlgorithm() {
-    const populationSize = 100;
-    const generations = 200;
+    const n = selectedCities.length;
+    let populationSize = n <= 10 ? 100 : 150;
+    let generations = n <= 10 ? 200 : 300;
     let population = Array.from({ length: populationSize }, () => shuffle([...selectedCities]));
     let bestRoute = null;
     let bestDistance = Infinity;
-
     for (let gen = 0; gen < generations; gen++) {
         population = population
             .map((route) => ({
@@ -303,15 +296,12 @@ function geneticAlgorithm() {
             }))
             .sort((a, b) => a.distance - b.distance)
             .slice(0, populationSize / 2);
-
         const newPopulation = [];
         while (newPopulation.length < populationSize) {
             const [parent1, parent2] = randomPair(population.map((p) => p.route));
             newPopulation.push(...crossover(parent1, parent2));
         }
-
         population = newPopulation.map((route) => mutate(route));
-
         const bestInGen = population[0];
         const bestInGenDistance = calculateRouteDistance(bestInGen);
         if (bestInGenDistance < bestDistance) {
@@ -319,62 +309,71 @@ function geneticAlgorithm() {
             bestRoute = bestInGen;
         }
     }
-
     return { route: [...bestRoute, bestRoute[0]], distance: bestDistance };
 }
 
 function simulatedAnnealing() {
-    let route = [...selectedCities];
+    const n = selectedCities.length;
+    let temperature = n <= 10 ? 5000 : 10000;
+    let coolingRate = n > 10 ? 0.997 : 0.995;
+    let route = shuffle([...selectedCities]);
     let bestRoute = [...route];
     let bestDistance = calculateRouteDistance(route);
-    let temperature = 10000;
-    const coolingRate = 0.995;
-
     while (temperature > 1) {
         const [i, j] = randomIndices(route.length);
         const newRoute = [...route];
         [newRoute[i], newRoute[j]] = [newRoute[j], newRoute[i]];
-
         const currentDistance = calculateRouteDistance(route);
         const newDistance = calculateRouteDistance(newRoute);
-
         if (
             newDistance < currentDistance ||
             Math.random() < Math.exp((currentDistance - newDistance) / temperature)
         ) {
             route = [...newRoute];
         }
-
         if (newDistance < bestDistance) {
             bestRoute = [...newRoute];
             bestDistance = newDistance;
         }
-
         temperature *= coolingRate;
     }
-
     return { route: [...bestRoute, bestRoute[0]], distance: bestDistance };
 }
 
-// Calcula la distancia total de una ruta utilizando la matriz de distancias
+// ============================
+//      FUNCIONES AUX
+// ============================
+
 function calculateRouteDistance(route) {
     let totalDistance = 0;
     for (let i = 0; i < route.length - 1; i++) {
         const cityIndex1 = selectedCities.indexOf(route[i]);
         const cityIndex2 = selectedCities.indexOf(route[i + 1]);
-        totalDistance += distanceMatrix[cityIndex1][cityIndex2];
+        totalDistance += distanceMatrix[cityIndex1]?.[cityIndex2] || 0;
     }
     return totalDistance;
 }
 
-// Funciones auxiliares
+function selectBestAlgorithm() {
+    const n = selectedCities.length;
+    if (n <= 4) {
+        return "Fuerza Bruta";
+    } else if (n <= 7) {
+        return "Búsqueda Local";
+    } else if (n <= 10) {
+        return "Algoritmo Genético";
+    } else {
+        return "Simulated Annealing";
+    }
+}
+
 function getPermutations(array) {
     if (array.length === 0) return [[]];
     const result = [];
     for (let i = 0; i < array.length; i++) {
         const rest = getPermutations(array.slice(0, i).concat(array.slice(i + 1)));
         for (const perm of rest) {
-            result.push([array[i]].concat(perm));
+            result.push([array[i], ...perm]);
         }
     }
     return result;
@@ -406,23 +405,18 @@ function crossover(parent1, parent2) {
     const start = Math.floor(Math.random() * parent1.length);
     const end = Math.floor(Math.random() * parent1.length);
     const [min, max] = [Math.min(start, end), Math.max(start, end)];
-
     const child1 = Array(parent1.length).fill(null);
     const child2 = Array(parent1.length).fill(null);
-
     for (let i = min; i <= max; i++) {
         child1[i] = parent1[i];
         child2[i] = parent2[i];
     }
-
-    let p1Index = 0,
-        p2Index = 0;
-
+    let p1Index = 0;
+    let p2Index = 0;
     for (let i = 0; i < parent1.length; i++) {
         if (!child1.includes(parent2[i])) child1[p1Index++] = parent2[i];
         if (!child2.includes(parent1[i])) child2[p2Index++] = parent1[i];
     }
-
     return [child1, child2];
 }
 
