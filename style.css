@@ -9,9 +9,21 @@ h1 {
     margin: 10px;
 }
 
-#map {
+#map-container {
+    position: relative;
     width: 100%;
-    height: 70vh;
+    height: 50vh;
+}
+
+.map {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+#map {
+    display: block; /* Por defecto se muestra el mapa de la ruta */
 }
 
 #controls {

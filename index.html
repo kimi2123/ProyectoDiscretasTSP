@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa Interactivo con Algoritmos</title>
+    <title>Rutas y Grafo con Google Maps</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAraMD5UVAr__7sCgvJu9wm-3g6_tiqikE&callback=initMap" async defer></script>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Mapa Interactivo con Algoritmos</h1>
-    <div id="map"></div>
+    <h1>Rutas y Grafo con Google Maps</h1>
+    <div id="map-container">
+        <div id="map" class="map"></div>
+        <div id="graph-map" class="map"></div>
+    </div>
     <div id="controls">
         <h3>Ciudades Seleccionadas:</h3>
         <ul id="selected-cities"></ul>
         <button id="clear-markers">Limpiar Ciudades</button>
+        <button id="toggle-map">Alternar Mapas</button>
         <div>
             <label for="algorithm-selector">Seleccionar Algoritmo:</label>
             <select id="algorithm-selector">
