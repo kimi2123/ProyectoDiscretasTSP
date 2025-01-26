@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rutas y Grafo con Google Maps</title>
-    <!-- Sustituye con tu propia API key si es necesario -->
+    <!-- Google Maps API -->
     <script 
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAraMD5UVAr__7sCgvJu9wm-3g6_tiqikE&callback=initMap" 
-      async defer>
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAraMD5UVAr__7sCgvJu9wm-3g6_tiqikE&callback=initMap" 
+        async defer>
     </script>
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
@@ -18,19 +18,38 @@
         <div id="map" class="map"></div>
         <div id="graph-map" class="map"></div>
     </div>
-    <div id="controls">
-        <h3>Ciudades Seleccionadas:</h3>
-        <ul id="selected-cities"></ul>
-        <button id="clear-markers">Limpiar Ciudades</button>
-        <button id="toggle-map">Alternar Mapas</button>
-        <p id="selected-algorithm" style="margin: 10px 0;"></p>
-        <button id="calculate-route">Calcular Ruta</button>
-        <div
-          id="results"
-          style="margin-top: 20px; background: #f9f9f9; padding: 15px; border: 1px solid #ddd;"
-        >
-            <h3>Resultados de la Ruta:</h3>
-            <p>Los resultados aparecerán aquí después de calcular la ruta.</p>
+    <div id="controls-results-container">
+        <!-- Contenedor para ciudades seleccionadas -->
+        <div id="controls" class="controls-box">
+            <h3>Ciudades Seleccionadas:</h3>
+            <ul id="selected-cities"></ul>
+        </div>
+
+        <!-- Nuevo box para los botones -->
+        <div id="buttons-box" class="buttons-box">
+            <button id="clear-markers">Limpiar Ciudades</button>
+            <button id="toggle-map">Alternar Mapas</button>
+            <button id="calculate-route">Calcular Ruta</button>
+            <p id="selected-algorithm">
+                <strong>Algoritmo Recomendado:</strong> <span id="algorithm-display"></span>
+            </p>
+        </div>
+
+        <!-- Contenedor para resultados de la ruta -->
+        <div id="results" class="results-container">
+            <h3>Resultados de la Ruta</h3>
+            <div class="result-item">
+                <span class="result-label">Ruta Calculada:</span>
+                <span class="result-value" id="route-display">--</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Distancia Total:</span>
+                <span class="result-value" id="total-distance">0.00 km</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Tiempo Estimado:</span>
+                <span class="result-value" id="total-time">0 horas y 0 minutos</span>
+            </div>
         </div>
     </div>
 </body>
