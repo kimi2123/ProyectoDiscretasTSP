@@ -39,7 +39,7 @@ function toggleMap() {
     document.getElementById("graph-map").style.display = showingGraphMap ? "block" : "none";
 
     if (showingGraphMap && currentRoute.length > 0) {
-        drawGraph(currentRoute); // Dibuja las líneas y nodos juntos
+        drawGraph(currentRoute);
     }
 }
 
@@ -51,7 +51,7 @@ function addMarker(location) {
 
     markers.push(marker);
     selectedCities.push({ lat: location.lat(), lng: location.lng() });
-    selectedOrder.push({ lat: location.lat(), lng: location.lng() }); // Almacena en orden fijo
+    selectedOrder.push({ lat: location.lat(), lng: location.lng() });
     updateSelectedCities();
     updateDistanceMatrix();
 }
@@ -60,7 +60,7 @@ function clearMarkers() {
     markers.forEach((marker) => marker.setMap(null));
     markers = [];
     selectedCities = [];
-    selectedOrder = []; // Limpia el orden de selección
+    selectedOrder = [];
     currentRoute = [];
     distanceMatrix = {};
     clearGraphLines();
@@ -69,10 +69,21 @@ function clearMarkers() {
     directionsRenderer.setMap(null);
     directionsRenderer = new google.maps.DirectionsRenderer({ map });
 
-    document.getElementById("results").innerHTML = `
-        <h3>Resultados de la Ruta:</h3>
-        <p>Los resultados aparecerán aquí después de calcular la ruta.</p>
-    `;
+    resetResults();
+}
+
+function resetResults() {
+    document.getElementById("route-display").textContent = "Ruta: ";
+    document.getElementById("total-distance").textContent = "0 km";
+    document.getElementById("total-time").textContent = "0 horas y 0 minutos";
+}
+
+function updateSelectedCities() {
+    const cityList = document.getElementById("selected-cities");
+    cityList.innerHTML = "";
+    selectedCities.forEach((city, index) => {
+        cityList.innerHTML += `<li>Ciudad ${index + 1}: (${city.lat.toFixed(6)}, ${city.lng.toFixed(6)})</li>`;
+    });
 }
 
 function addNumberedNodes() {
@@ -107,14 +118,6 @@ function addNumberedNodes() {
 function clearGraphLines() {
     graphLines.forEach((line) => line.setMap(null)); // Borra líneas y nodos
     graphLines = [];
-}
-
-function updateSelectedCities() {
-    const cityList = document.getElementById("selected-cities");
-    cityList.innerHTML = "";
-    selectedCities.forEach((city, index) => {
-        cityList.innerHTML += `<li>Ciudad ${index + 1}: (${city.lat.toFixed(6)}, ${city.lng.toFixed(6)})</li>`;
-    });
 }
 
 function updateDistanceMatrix() {
@@ -215,13 +218,13 @@ function drawGraph(route) {
 }
 
 function calculateRoute() {
-    const algorithm = selectBestAlgorithm();
-    document.getElementById("algorithm-display").textContent = algorithm;
-
     if (selectedCities.length < 2) {
         alert("Selecciona al menos dos ciudades para calcular una ruta.");
         return;
     }
+
+    const algorithm = selectBestAlgorithm();
+    document.getElementById("algorithm-display").textContent = algorithm;
 
     let result;
     switch (algorithm) {
@@ -269,10 +272,14 @@ function drawRealRoute(route) {
             if (status === google.maps.DirectionsStatus.OK) {
                 directionsRenderer.setDirections(response);
 
-                const totalDistance = response.routes[0].legs.reduce((sum, leg) => sum + leg.distance.value, 0) / 1000;
-                const totalDuration = response.routes[0].legs.reduce((sum, leg) => sum + leg.duration.value, 0);
+                // Calcular distancia y tiempo total correctamente
+                const totalDistance = response.routes[0].legs.reduce((sum, leg) => sum + leg.distance.value, 0) / 1000; // Distancia en km
+                const totalDuration = response.routes[0].legs.reduce((sum, leg) => sum + leg.duration.value, 0); // Duración en segundos
 
-                displayResults(route, totalDistance, totalDuration);
+                const hours = Math.floor(totalDuration / 3600); // Conversión a horas
+                const minutes = Math.round((totalDuration % 3600) / 60); // Conversión a minutos
+
+                displayResults(route, totalDistance, totalDuration, hours, minutes);
             } else if (status === google.maps.DirectionsStatus.ZERO_RESULTS) {
                 alert("No se pudo calcular la ruta: Verifica que todas las ubicaciones estén conectadas por caminos.");
             } else {
@@ -282,20 +289,17 @@ function drawRealRoute(route) {
     );
 }
 
-function displayResults(route, totalDistance, totalDuration) {
+function displayResults(route, totalDistance, totalDuration, hours, minutes) {
     const routeDisplay = route
         .slice(0, -1)
         .map((city, index) => `Ciudad ${index + 1}`)
         .join(" → ") + " → Ciudad 1";
 
-    const hours = Math.floor(totalDuration / 60);
-    const minutes = Math.round(totalDuration % 60);
-
     document.getElementById("route-display").textContent = routeDisplay;
     document.getElementById("total-distance").textContent = `${totalDistance.toFixed(2)} km`;
     document.getElementById("total-time").textContent = `${hours} horas y ${minutes} minutos`;
 
-    console.log("Resultados mostrados: ", { routeDisplay, totalDistance, totalDuration });
+    console.log("Resultados mostrados: ", { routeDisplay, totalDistance, totalDuration, hours, minutes });
 }
 
 function calculateDistance(city1, city2) {
