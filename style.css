@@ -4,36 +4,37 @@ body {
     margin: 0;
     padding: 0;
     background: #eef2f3;
-}
-
-h1 {
+  }
+  
+  h1 {
     text-align: center;
     margin: 10px;
     color: #333;
     font-size: 24px;
-}
-
-/* Contenedor del mapa */
-#map-container {
+  }
+  
+  /* Contenedor del mapa */
+  #map-container {
     position: relative;
     width: 100%;
     height: 50vh;
     margin-bottom: 20px;
-}
-
-.map {
+  }
+  
+  .map {
     position: absolute;
     width: 100%;
     height: 100%;
     display: none;
-}
-
-#map {
-    display: block; /* Mostrar mapa principal por defecto */
-}
-
-/* Contenedor principal en diseño horizontal */
-#controls-results-container {
+  }
+  
+  /* Muestra el mapa principal por defecto */
+  #map {
+    display: block;
+  }
+  
+  /* Contenedor principal en diseño horizontal */
+  #controls-results-container {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -43,34 +44,34 @@ h1 {
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin: 0 20px;
-}
-
-/* Estilos para las cajas */
-.controls-box,
-.buttons-box,
-.results-container {
+  }
+  
+  /* Estilos para las cajas */
+  .controls-box,
+  .buttons-box,
+  .results-container {
     flex: 1;
-    max-width: 30%; /* Ajusta según necesidad */
+    max-width: 30%;
     padding: 20px;
     background: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 15px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilo del título de las secciones */
-.controls-box h3,
-.results-container h3 {
+  }
+  
+  /* Estilo del título de las secciones */
+  .controls-box h3,
+  .results-container h3 {
     margin-bottom: 15px;
     font-size: 20px;
     color: #007bff;
     text-align: center;
     border-bottom: 2px solid #ddd;
     padding-bottom: 10px;
-}
-
-/* Estilo de botones */
-.buttons-box button {
+  }
+  
+  /* Estilo de botones */
+  .buttons-box button {
     display: block;
     width: 100%;
     margin: 10px 0;
@@ -82,45 +83,80 @@ h1 {
     color: white;
     border: none;
     transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.buttons-box button:hover {
+  }
+  
+  .buttons-box button:hover {
     background-color: #0056b3;
     transform: scale(1.05);
-}
-
-/* Estilo del texto del algoritmo recomendado */
-#selected-algorithm {
+  }
+  
+  /* Estilo del texto del algoritmo recomendado */
+  #selected-algorithm {
     margin-top: 15px;
     font-size: 16px;
     color: #333;
     text-align: center;
-}
-
-#selected-algorithm strong {
+  }
+  
+  #selected-algorithm strong {
     color: #007bff;
-}
-
-/* Espaciado y formato en resultados */
-.result-item {
+  }
+  
+  /* Espaciado y formato en resultados */
+  .result-item {
     margin: 10px 0;
     display: flex;
     justify-content: space-between;
-}
-
-.result-label {
+  }
+  
+  .result-label {
     font-weight: bold;
     color: #555;
-}
-
-.result-value {
+  }
+  
+  .result-value {
     font-size: 16px;
     color: #007bff;
     font-weight: bold;
     transition: color 0.3s ease, transform 0.3s ease;
-}
-
-.result-value:hover {
+  }
+  
+  .result-value:hover {
     color: #0056b3;
     transform: scale(1.05);
-}
+  }
+  
+  /* ===================== */
+  /*      MEDIA QUERY      */
+  /* ===================== */
+  /* Ajustes para pantallas más pequeñas (móviles, tablets) */
+  @media (max-width: 768px) {
+    /* Apila los contenedores en columna */
+    #controls-results-container {
+      flex-direction: column;
+      margin: 0 10px;
+    }
+  
+    /* Ajusta el alto del contenedor del mapa para que no ocupe demasiado espacio vertical */
+    #map-container {
+      height: 40vh;
+      margin-bottom: 10px;
+    }
+  
+    /* Asegura que el mapa ocupe todo el espacio disponible */
+    .map {
+      position: static;
+      width: 100%;
+      height: 40vh;
+      display: block; /* Para que sea visible si se alterna */
+    }
+  
+    /* Ajustes de ancho máximo a 100% en los paneles */
+    .controls-box,
+    .buttons-box,
+    .results-container {
+      max-width: 100%;
+      margin-bottom: 15px;
+    }
+  }
+  

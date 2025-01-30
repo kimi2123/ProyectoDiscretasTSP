@@ -249,7 +249,8 @@ function calculateRoute() {
         currentRoute = [...result.route];
         drawGraph(currentRoute);
 
-        const estimatedTime = result.distance * 1.5 * 60; // Ejemplo: 1.5 minutos por km
+        // Ejemplo de cálculo de tiempo estimado (no real)
+        const estimatedTime = result.distance * 1.5 * 60; // 1.5 minutos por km
         displayResults(result.route, result.distance, estimatedTime);
         drawRealRoute(currentRoute);
     }
@@ -273,15 +274,23 @@ function drawRealRoute(route) {
                 directionsRenderer.setDirections(response);
 
                 // Calcular distancia y tiempo total correctamente
-                const totalDistance = response.routes[0].legs.reduce((sum, leg) => sum + leg.distance.value, 0) / 1000; // Distancia en km
-                const totalDuration = response.routes[0].legs.reduce((sum, leg) => sum + leg.duration.value, 0); // Duración en segundos
+                const totalDistance = response.routes[0].legs.reduce(
+                    (sum, leg) => sum + leg.distance.value,
+                    0
+                ) / 1000; // Distancia en km
+                const totalDuration = response.routes[0].legs.reduce(
+                    (sum, leg) => sum + leg.duration.value,
+                    0
+                ); // Duración en segundos
 
-                const hours = Math.floor(totalDuration / 3600); // Conversión a horas
-                const minutes = Math.round((totalDuration % 3600) / 60); // Conversión a minutos
+                const hours = Math.floor(totalDuration / 3600);
+                const minutes = Math.round((totalDuration % 3600) / 60);
 
                 displayResults(route, totalDistance, totalDuration, hours, minutes);
             } else if (status === google.maps.DirectionsStatus.ZERO_RESULTS) {
-                alert("No se pudo calcular la ruta: Verifica que todas las ubicaciones estén conectadas por caminos.");
+                alert(
+                    "No se pudo calcular la ruta: Verifica que todas las ubicaciones estén conectadas por caminos."
+                );
             } else {
                 alert("No se pudo calcular la ruta: " + status);
             }
@@ -290,14 +299,19 @@ function drawRealRoute(route) {
 }
 
 function displayResults(route, totalDistance, totalDuration, hours, minutes) {
+    // Generar un string como "Ciudad 1 → Ciudad 2 → ... → Ciudad 1"
     const routeDisplay = route
         .slice(0, -1)
         .map((city, index) => `Ciudad ${index + 1}`)
         .join(" → ") + " → Ciudad 1";
 
     document.getElementById("route-display").textContent = routeDisplay;
-    document.getElementById("total-distance").textContent = `${totalDistance.toFixed(2)} km`;
-    document.getElementById("total-time").textContent = `${hours} horas y ${minutes} minutos`;
+    if (typeof totalDistance === "number") {
+        document.getElementById("total-distance").textContent = `${totalDistance.toFixed(2)} km`;
+    }
+    if (hours !== undefined && minutes !== undefined) {
+        document.getElementById("total-time").textContent = `${hours} horas y ${minutes} minutos`;
+    }
 
     console.log("Resultados mostrados: ", { routeDisplay, totalDistance, totalDuration, hours, minutes });
 }
@@ -314,7 +328,9 @@ function calculateDistance(city1, city2) {
         return distanceMatrix[index1]?.[index2] || 0;
     }
 
-    console.error(`No se encontró distancia entre (${city1.lat}, ${city1.lng}) y (${city2.lat}, ${city2.lng})`);
+    console.error(
+        `No se encontró distancia entre (${city1.lat}, ${city1.lng}) y (${city2.lat}, ${city2.lng})`
+    );
     return 0;
 }
 
@@ -335,7 +351,7 @@ function bruteForce() {
         }
     }
 
-    return { route: [...bestRoute, bestRoute[0]], distance: bestDistance }; // Cierra el ciclo
+    return { route: [...bestRoute, bestRoute[0]], distance: bestDistance };
 }
 
 function localSearch() {
@@ -349,7 +365,7 @@ function localSearch() {
         for (let i = 1; i < route.length - 1; i++) {
             for (let j = i + 1; j < route.length; j++) {
                 const newRoute = [...route];
-                [newRoute[i], newRoute[j]] = [newRoute[j], newRoute[i]]; // Intercambiar ciudades
+                [newRoute[i], newRoute[j]] = [newRoute[j], newRoute[i]]; // Intercambiar
                 const newDistance = calculateRouteDistance(newRoute);
 
                 if (newDistance < bestDistance) {
@@ -361,7 +377,7 @@ function localSearch() {
         }
     }
 
-    return { route: [...route, route[0]], distance: bestDistance }; // Ruta cerrada
+    return { route: [...route, route[0]], distance: bestDistance };
 }
 
 function geneticAlgorithm() {
@@ -397,21 +413,17 @@ function geneticAlgorithm() {
         }
     }
 
-    return { route: [...bestRoute, bestRoute[0]], distance: bestDistance }; // Ruta cerrada
+    return { route: [...bestRoute, bestRoute[0]], distance: bestDistance };
 }
 
 function simulatedAnnealing() {
-    const n = selectedCities.length;
-
-    // Configuración de parámetros
-    let temperature = 10000; // Temperatura inicial
-    const coolingRate = 0.995; // Tasa de enfriamiento
-    let route = shuffle([...selectedCities]); // Ruta inicial aleatoria
+    let temperature = 10000;
+    const coolingRate = 0.995;
+    let route = shuffle([...selectedCities]);
     let bestRoute = [...route];
     let bestDistance = calculateRouteDistance(route);
 
     while (temperature > 1) {
-        // Selecciona dos índices aleatorios para intercambiar
         const [i, j] = randomIndices(route.length);
         const newRoute = [...route];
         [newRoute[i], newRoute[j]] = [newRoute[j], newRoute[i]];
@@ -419,25 +431,21 @@ function simulatedAnnealing() {
         const currentDistance = calculateRouteDistance(route);
         const newDistance = calculateRouteDistance(newRoute);
 
-        // Decide si se acepta la nueva solución
         if (
-            newDistance < currentDistance || // Aceptar si es mejor
-            Math.random() < Math.exp((currentDistance - newDistance) / temperature) // Aceptar con probabilidad
+            newDistance < currentDistance ||
+            Math.random() < Math.exp((currentDistance - newDistance) / temperature)
         ) {
             route = [...newRoute];
         }
 
-        // Actualiza la mejor solución encontrada
         if (newDistance < bestDistance) {
             bestRoute = [...newRoute];
             bestDistance = newDistance;
         }
 
-        // Enfría la temperatura
         temperature *= coolingRate;
     }
 
-    // Devuelve la mejor solución encontrada
     return { route: [...bestRoute, bestRoute[0]], distance: bestDistance };
 }
 
@@ -459,7 +467,7 @@ function calculateRouteDistance(route) {
         if (cityIndex1 !== -1 && cityIndex2 !== -1) {
             totalDistance += distanceMatrix[cityIndex1]?.[cityIndex2] || 0;
         } else {
-            console.error(`Distancia no encontrada entre (${route[i].lat}, ${route[i].lng}) y (${route[i + 1].lat}, ${route[i + 1].lng})`);
+            console.error(`Distancia no encontrada entre (${route[i].lat}, ${route[i].lng}) y (${route[i+1].lat}, ${route[i+1].lng})`);
         }
     }
 
@@ -518,7 +526,6 @@ function crossover(parent1, parent2) {
     const end = Math.floor(Math.random() * parent1.length);
     const [min, max] = [Math.min(start, end), Math.max(start, end)];
 
-    // Copia un segmento del primer padre
     const child1 = Array(parent1.length).fill(null);
     const child2 = Array(parent2.length).fill(null);
 
@@ -527,7 +534,6 @@ function crossover(parent1, parent2) {
         child2[i] = parent2[i];
     }
 
-    // Rellena el resto con los genes del otro padre en el orden en que aparecen
     let parent2Index = 0;
     let parent1Index = 0;
 
@@ -549,7 +555,7 @@ function crossover(parent1, parent2) {
 function mutate(route) {
     if (Math.random() < 0.1) {
         const [i, j] = randomIndices(route.length);
-        [route[i], route[j]] = [route[j], route[i]]; // Intercambia dos ciudades
+        [route[i], route[j]] = [route[j], route[i]];
     }
     return route;
 }
