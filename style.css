@@ -25,15 +25,16 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
+    /* Importante: Por defecto se oculta para que el JavaScript decida cuál mostrar */
     display: none;
   }
   
   /* Muestra el mapa principal por defecto */
   #map {
-    display: block;
+    display: block; /* #map se ve inicialmente */
   }
   
-  /* Contenedor principal en diseño horizontal */
+  /* Contenedor principal (diseño horizontal por defecto) */
   #controls-results-container {
     display: flex;
     justify-content: space-between;
@@ -131,27 +132,27 @@ body {
   /* ===================== */
   /* Ajustes para pantallas más pequeñas (móviles, tablets) */
   @media (max-width: 768px) {
-    /* Apila los contenedores en columna */
+    /* Distribución en columna para que los paneles se apilen verticalmente */
     #controls-results-container {
       flex-direction: column;
       margin: 0 10px;
     }
   
-    /* Ajusta el alto del contenedor del mapa para que no ocupe demasiado espacio vertical */
+    /* Ajusta la altura del contenedor del mapa para que no ocupe demasiado espacio vertical */
     #map-container {
       height: 40vh;
       margin-bottom: 10px;
     }
   
-    /* Asegura que el mapa ocupe todo el espacio disponible */
+    /* Cambia la posición para evitar traslape; se quita 'display:block' para que JS decida cuál mostrar */
     .map {
-      position: static;
+      position: static;  /* Ya no en absolute, así el mapa fluye con el contenido */
       width: 100%;
       height: 40vh;
-      display: block; /* Para que sea visible si se alterna */
+      /* No establecemos display aquí para no interferir con la lógica de JS */
     }
   
-    /* Ajustes de ancho máximo a 100% en los paneles */
+    /* Ajustes de ancho máximo a 100% en los paneles para que ocupen todo el ancho disponible */
     .controls-box,
     .buttons-box,
     .results-container {
@@ -159,4 +160,3 @@ body {
       margin-bottom: 15px;
     }
   }
-  
